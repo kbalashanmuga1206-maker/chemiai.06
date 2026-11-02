@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101923">
+<title>ChemiLab - Virtual Cheminformatics Laboratory</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/smiles-drawer@2.1.2/dist/smiles-drawer.min.js"></script>
+<script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+
+<style>
+:root {
+ --bg:#0b1118;
+ --panel:#121d28;
+ --panel2:#172432;
+ --line:#263747;
+ --text:#edf4f7;
+ --muted:#91a5b5;
+ --teal:#54e0c1;
+ --blue:#77aaff;
+ --violet:#b59cff;
+ --pink:#ff8ca8;
+}
+
+* {box-sizing:border-box}
+
+body {
+ margin:0;
+ background:radial-gradient(ellipse at 75% -10%,#1b3443,transparent 35%),var(--bg);
+ color:var(--text);
+ font-family:Manrope,Arial,sans-serif;
+}
+
+button,input,textarea {font:inherit}
+
+.wrap {
+ max-width:1180px;
+ margin:auto;
+ padding:0 28px;
+}
+
+.topbar {
+ height:72px;
+ border-bottom:1px solid var(--line);
+ display:flex;
+ align-items:center;
+ position:sticky;
+ top:0;
+ z-index:5;
+ background:#0b1118ed;
+ backdrop-filter:blur(16px);
+}
+
+.brand {
+ display:flex;
+ align-items:center;
+ gap:12px;
+ font-weight:800;
+}
+
+.brandmark {
+ width:40px;
+ height:40px;
+ border-radius:12px;
+ background:linear-gradient(140deg,var(--teal),var(--blue));
+ display:grid;
+ place-items:center;
+ color:#08202a;
+ font-size:24px;
+}
+
+.brand small {
+ display:block;
+ color:var(--muted);
+ font-size:10px;
+ letter-spacing:2px;
+}
+
+.topinner {
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ width:100%;
+}
+
+.hero {
+ padding:60px 0 40px;
+ display:grid;
+ grid-template-columns:1.2fr .8fr;
+ gap:28px;
+ align-items:center;
+}
+
+.eyebrow {
+ color:var(--teal);
+ font:11px 'DM Mono';
+ letter-spacing:2px;
+ text-transform:uppercase;
+}
+
+h1 {
+ font-size:clamp(38px,6vw,66px);
+ line-height:1.05;
+ letter-spacing:-3px;
+ margin:16px 0;
+}
+
+h1 span {color:var(--teal)}
+
+.hero p {
+ color:#a8bac7;
+ line-height:1.8;
+ font-size:15px;
+}
+
+.hero-art {
+ height:250px;
+ border:1px solid #2b4554;
+ border-radius:24px;
+ background:linear-gradient(145deg,#142b37,#111b29);
+ display:grid;
+ place-items:center;
+ position:relative;
+ overflow:hidden;
+}
+
+.orb {
+ font-size:75px;
+ filter:drop-shadow(0 0 25px #54e0c188);
+}
+
+.orbline {
+ position:absolute;
+ width:270px;
+ height:100px;
+ border:1px solid #b59cff88;
+ border-radius:50%;
+ transform:rotate(-32deg);
+}
+
+.stats {
+ display:flex;
+ gap:12px;
+ flex-wrap:wrap;
+ margin-top:22px;
+}
+
+.stat {
+ padding:10px;
+ border:1px solid var(--line);
+ border-radius:10px;
+ font-size:11px;
+ color:#b4c4ce;
+}
+
+.section {margin:35px 0 45px}
+
+.sectionhead {
+ display:flex;
+ justify-content:space-between;
+ align-items:end;
+ margin-bottom:16px;
+}
+
+.sectionhead h2 {
+ font-size:23px;
+ margin:5px 0;
+}
+
+.muted {
+ color:var(--muted);
+ font-size:12px;
+}
+
+.labgrid {
+ display:grid;
+ grid-template-columns:minmax(300px,.9fr) minmax(0,1.1fr);
+ gap:16px;
+}
+
+.card {
+ background:linear-gradient(155deg,#152331,#111b26);
+ border:1px solid var(--line);
+ border-radius:17px;
+ padding:20px;
+ box-shadow:0 18px 50px #0005;
+}
+
+.cardtitle {
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:15px;
+}
+
+.cardtitle h3 {font-size:14px;margin:0}
+
+.pill {
+ font:11px 'DM Mono';
+ color:var(--teal);
+ background:#54e0c114;
+ border:1px solid #54e0c144;
+ padding:5px 8px;
+ border-radius:20px;
+}
+
+.label {
+ display:block;
+ color:#a7bac7;
+ font-size:11px;
+ font-weight:700;
+ margin:13px 0 7px;
+}
+
+.field {
+ width:100%;
+ border:1px solid #304656;
+ background:#0c151e;
+ color:var(--text);
+ padding:12px;
+ border-radius:10px;
+ outline:none;
+}
+
+.field:focus {
+ border-color:var(--teal);
+}
+
+.mono {
+ font-family:'DM Mono',monospace;
+ font-size:12px;
+}
+
+.btn {
+ border:0;
+ border-radius:10px;
+ padding:11px 15px;
+ background:var(--teal);
+ color:#06221f;
+ font-weight:800;
+ font-size:12px;
+ cursor:pointer;
+}
+
+.btn:hover {filter:brightness(1.1)}
+
+.btn.secondary {
+ background:#203342;
+ color:#dce9f0;
+ border:1px solid #385063;
+}
+
+.btn.ghost {
+ background:transparent;
+ border:1px solid var(--line);
+ color:#b9cbd6;
+}
+
+.btnrow {
+ display:flex;
+ gap:8px;
+ flex-wrap:wrap;
+ margin-top:13px;
+}
+
+.examples {
+ display:flex;
+ gap:7px;
+ flex-wrap:wrap;
+ margin-top:14px;
+}
+
+.chip {
+ border:1px solid #344858;
+ background:#1a2a37;
+ color:#b9cad4;
+ padding:7px 9px;
+ border-radius:8px;
+ font-size:10px;
+ cursor:pointer;
+}
+
+.chip:hover {
+ border-color:var(--teal);
+ color:var(--teal);
+}
+
+.status {
+ font-size:11px;
+ color:var(--muted);
+ min-height:18px;
+ margin-top:10px;
+}
+
+.status.good {color:var(--teal)}
+.status.bad {color:var(--pink)}
+
+.views {
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:12px;
+}
+
+.viewbox {
+ min-height:230px;
+ background:#0b141d;
+ border:1px solid #243746;
+ border-radius:12px;
+ position:relative;
+ overflow:hidden;
+}
+
+.viewlabel {
+ position:absolute;
+ top:10px;
+ left:12px;
+ color:#78909f;
+ font:10px 'DM Mono';
+ z-index:1;
+}
+
+.viewer3d {
+ width:100%;
+ height:230px;
+}
+
+.empty {
+ height:230px;
+ display:grid;
+ place-items:center;
+ color:#647b8b;
+ font-size:12px;
+ text-align:center;
+ padding:20px;
+}
+
+.properties {
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:9px;
+ margin-top:13px;
+}
+
+.prop {
+ padding:11px;
+ background:#0d1720;
+ border:1px solid #243746;
+ border-radius:10px;
+}
+
+.prop span {
+ display:block;
+ color:#8096a5;
+ font-size:9px;
+ margin-bottom:5px;
+}
+
+.prop b {
+ font:500 13px 'DM Mono';
+ color:#e9f4f7;
+}
+
+.viewtabs {display:flex;gap:6px}
+
+.tab {
+ border:1px solid var(--line);
+ background:transparent;
+ color:var(--muted);
+ border-radius:8px;
+ padding:7px 10px;
+ font-size:10px;
+ cursor:pointer;
+}
+
+.tab.active {
+ background:#54e0c11a;
+ border-color:#54e0c177;
+ color:var(--teal);
+}
+
+.tablewrap {overflow:auto}
+
+table {
+ width:100%;
+ border-collapse:collapse;
+ font-size:11px;
+}
+
+th,td {
+ padding:12px 11px;
+ text-align:left;
+ border-bottom:1px solid var(--line);
+}
+
+th {color:#8299a8}
+td {color:#d4e0e6}
+
+.featurelist {
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:12px;
+}
+
+.feature {
+ border:1px solid var(--line);
+ background:#121e29;
+ border-radius:13px;
+ padding:15px;
+}
+
+.feature .ico {font-size:20px}
+.feature b {display:block;font-size:12px;margin:8px 0 4px}
+.feature p {color:var(--muted);font-size:10px;line-height:1.6}
+
+.notice {
+ border:1px solid #7d693b;
+ background:#392e171f;
+ color:#e9c88c;
+ padding:10px;
+ border-radius:9px;
+ font-size:10px;
+ margin-top:12px;
+ line-height:1.5;
+}
+
+.footer {
+ border-top:1px solid var(--line);
+ padding:25px 0 35px;
+ color:#8397a5;
+ font-size:11px;
+ display:flex;
+ justify-content:space-between;
+ flex-wrap:wrap;
+ gap:12px;
+}
+
+.footer strong {color:white}
+
+@media(max-width:800px) {
+ .hero {grid-template-columns:1fr}
+ .labgrid {grid-template-columns:1fr}
+ .featurelist {grid-template-columns:repeat(2,1fr)}
+}
+
+@media(max-width:520px) {
+ .wrap {padding:0 16px}
+ .topbar {height:60px}
+ .hero h1 {letter-spacing:-2px}
+ .views {grid-template-columns:1fr}
+ .properties {grid-template-columns:repeat(2,1fr)}
+ .card {padding:15px}
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+ <div class="wrap topinner">
+  <div class="brand">
+   <div class="brandmark">⌬</div>
+   <div>
+    CHEMILAB
+    <small>VIRTUAL CHEMINFORMATICS LAB</small>
+   </div>
+  </div>
+  <div class="muted">
+   SRM Institute of Science &amp; Technology
+  </div>
+ </div>
+</header>
+
+<main class="wrap">
+
+<section class="hero">
+ <div>
+  <div class="eyebrow">Molecular exploration · Learn by doing</div>
+
+  <h1>
+   Think in atoms.<br>
+   <span>Discover molecules.</span>
+  </h1>
+
+  <p>
+   An interactive cheminformatics workspace to inspect
+   molecular structures, explore chemical properties,
+   compare compounds and download your results.
+  </p>
+
+  <div class="stats">
+   <div class="stat">01 SMILES input</div>
+   <div class="stat">02 2D &amp; 3D views</div>
+   <div class="stat">03 Molecular properties</div>
+  </div>
+ </div>
+
+ <div class="hero-art">
+  <div class="orbline"></div>
+  <div class="orb">⚛</div>
+ </div>
+</section>
+
+<section class="section">
+
+ <div class="sectionhead">
+  <div>
+   <div class="eyebrow">Workspace / 01</div>
+   <h2>Molecule Explorer</h2>
+   <div class="muted">
+    Enter a SMILES string or choose a sample compound.
+   </div>
+  </div>
+  <span class="pill">LIVE LAB</span>
+ </div>
+
+ <div class="labgrid">
+
+  <div class="card">
+   <div class="cardtitle">
+    <h3>Structure Input</h3>
+    <span class="pill">SMILES</span>
+   </div>
+
+   <label class="label" for="molname">Molecule Name</label>
+   <input id="molname" class="field" value="Limonene">
+
+   <label class="label" for="smiles">SMILES Notation</label>
+   <textarea id="smiles" class="field mono" rows="4">C=C(C)[C@@H]1CC=C(C)CC1</textarea>
+
+   <div class="btnrow">
+    <button class="btn" id="analyze">Analyze Molecule ↗</button>
+    <button class="btn secondary" id="addcompare">＋ Compare</button>
+    <button class="btn ghost" id="clear">Clear</button>
+   </div>
+
+   <div id="status" class="status">
+    Ready. Analyze a molecule to begin.
+   </div>
+
+   <div class="label">TRY A SAMPLE</div>
+   <div class="examples" id="examples"></div>
+
+   <div class="notice">
+    Structure rendering and property lookup use the public
+    PubChem service. Internet connection is required.
+   </div>
+  </div>
+
+  <div class="card">
+
+   <div class="cardtitle">
+    <h3>Structure Visualization</h3>
+
+    <div class="viewtabs">
+     <button class="tab active" data-view="2d">2D</button>
+     <button class="tab" data-view="3d">3D</button>
+    </div>
+   </div>
+
+   <div class="views">
+
+    <div class="viewbox">
+     <span class="viewlabel">2D STRUCTURE</span>
+     <div id="draw2d" class="empty">
+      Your 2D molecular structure will appear here.
+     </div>
+    </div>
+
+    <div class="viewbox">
+     <span class="viewlabel">3D CONFORMER</span>
+     <div id="draw3d" class="empty">
+      3D conformer loads after analysis.
+     </div>
+    </div>
+
+   </div>
+
+   <div class="properties" id="properties">
+    <div class="prop"><span>FORMULA</span><b>—</b></div>
+    <div class="prop"><span>MOLAR MASS</span><b>—</b></div>
+    <div class="prop"><span>XLOGP</span><b>—</b></div>
+    <div class="prop"><span>TPSA</span><b>—</b></div>
+   </div>
+
+  </div>
+
+ </div>
+</section>
+
+<section class="section">
+
+ <div class="sectionhead">
+  <div>
+   <div class="eyebrow">Workspace / 02</div>
+   <h2>Compound Comparison</h2>
+   <div class="muted">
+    Compare molecular properties side by side.
+   </div>
+  </div>
+
+  <button class="btn secondary" id="downloadCsv">
+   Download CSV ↓
+  </button>
+ </div>
+
+ <div class="card tablewrap">
+  <table>
+   <thead>
+    <tr>
+     <th>MOLECULE</th>
+     <th>FORMULA</th>
+     <th>MOLAR MASS</th>
+     <th>XLOGP</th>
+     <th>TPSA</th>
+     <th></th>
+    </tr>
+   </thead>
+   <tbody id="compareBody">
+    <tr>
+     <td colspan="6">No compounds added yet.</td>
+    </tr>
+   </tbody>
+  </table>
+ </div>
+
+</section>
+
+<section class="section">
+
+ <div class="sectionhead">
+  <div>
+   <div class="eyebrow">What you can explore</div>
+   <h2>A Digital Chemistry Laboratory</h2>
+  </div>
+ </div>
+
+ <div class="featurelist">
+
+  <div class="feature">
+   <div class="ico">⌘</div>
+   <b>SMILES Validation</b>
+   <p>Validate molecular notation and structure.</p>
+  </div>
+
+  <div class="feature">
+   <div class="ico">◇</div>
+   <b>2D &amp; 3D Structures</b>
+   <p>Explore molecular structures in two and three dimensions.</p>
+  </div>
+
+  <div class="feature">
+   <div class="ico">▦</div>
+   <b>Property Explorer</b>
+   <p>Review formula, molecular weight, XLogP and TPSA.</p>
+  </div>
+
+  <div class="feature">
+   <div class="ico">⇩</div>
+   <b>Export &amp; Compare</b>
+   <p>Compare compounds and export reports as CSV.</p>
+  </div>
+
+ </div>
+</section>
+
+</main>
+
+<footer class="wrap footer">
+ <div><strong>⌬ ChemiLab</strong> · Virtual Laboratory</div>
+ <div>Developed by <strong>K. BALASHANMUGA</strong></div>
+ <div>Educational Project · 2026</div>
+</footer>
+
+<script>
+
+const samples = [
+ {
+  name:'Limonene',
+  smiles:'C=C(C)[C@@H]1CC=C(C)CC1'
+ },
+ {
+  name:'Vanillin',
+  smiles:'COc1cc(C=O)ccc1O'
+ },
+ {
+  name:'Ibuprofen',
+  smiles:'CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O'
+ },
+ {
+  name:'Nicotinamide',
+  smiles:'NC(=O)c1cccnc1'
+ },
+ {
+  name:'Citric Acid',
+  smiles:'C(C(=O)O)C(CC(=O)O)(C(=O)O)O'
+ },
+ {
+  name:'Menthol',
+  smiles:'CC(C)C1CCC(C)CC1O'
+ }
+];
+
+let current = null;
+let compare = [];
+
+const $ = id => document.getElementById(id);
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g,c=>({
+ '&':'&amp;',
+ '<':'&lt;',
+ '>':'&gt;',
+ '"':'&quot;',
+ "'":'&#39;'
+}[c]));
+
+function status(msg,type='') {
+ $('status').textContent = msg;
+ $('status').className = 'status '+type;
+}
+
+// Sample molecule buttons
+samples.forEach(s => {
+ const b = document.createElement('button');
+ b.className = 'chip';
+ b.textContent = s.name;
+
+ b.onclick = () => {
+  $('molname').value = s.name;
+  $('smiles').value = s.smiles;
+  analyze();
+ };
+
+ $('examples').appendChild(b);
+});
+
+// 2D structure visualization
+function render2d(smiles) {
+
+ const target = $('draw2d');
+
+ target.className = '';
+ target.innerHTML =
+ '<canvas id="smilesCanvas" width="600" height="420" style="width:100%;height:230px"></canvas>';
+
+ try {
+
+  const drawer = new SmilesDrawer.Drawer({
+   width:600,
+   height:420,
+   bondThickness:1.7,
+   bondLength:28,
+   fontSize:16,
+   themes:{
+    dark:{
+     C:'#e7f0f4',
+     O:'#ff7777',
+     N:'#77aaff',
+     F:'#8ce0a5',
+     CL:'#8ce0a5',
+     BR:'#c78c6b',
+     I:'#b59cff',
+     P:'#ffbd75',
+     S:'#f2d36d',
+     H:'#dbe7ec',
+     BACKGROUND:'#0b141d'
+    }
+   }
+  });
+
+  SmilesDrawer.parse(
+   smiles,
+   tree => drawer.draw(tree,'smilesCanvas','dark',false),
+   err => {
+    target.innerHTML =
+     '<div class="empty">Could not draw this SMILES string.</div>';
+   }
+  );
+
+ } catch(e) {
+  target.innerHTML =
+   '<div class="empty">2D renderer unavailable.</div>';
+ }
+}
+
+// Retrieve molecule properties from PubChem
+async function pubchem(smiles) {
+
+ const url =
+ 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/' +
+ encodeURIComponent(smiles) + '/cids/JSON';
+
+ const response = await fetch(url);
+
+ if(!response.ok) {
+  throw Error('PubChem could not identify this structure. Check SMILES.');
+ }
+
+ const result = await response.json();
+
+ const cid = result.IdentifierList?.CID?.[0];
+
+ if(!cid) {
+  throw Error('No matching compound was found.');
+ }
+
+ const propertyUrl =
+ `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/MolecularFormula,MolecularWeight,XLogP,TPSA,IUPACName/JSON`;
+
+ const propertyResponse = await fetch(propertyUrl);
+
+ if(!propertyResponse.ok) {
+  throw Error('Could not load molecular properties.');
+ }
+
+ const data = await propertyResponse.json();
+
+ return {
+  cid,
+  ...data.PropertyTable.Properties[0]
+ };
+}
+
+// 3D structure visualization
+async function load3d(cid) {
+
+ const box = $('draw3d');
+
+ box.innerHTML = '';
+ box.className = 'viewer3d';
+
+ try {
+
+  const response = await fetch(
+   `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/SDF?record_type=3d`
+  );
+
+  if(!response.ok) throw Error();
+
+  const sdf = await response.text();
+
+  if(!sdf.includes('PUBCHEM')) throw Error();
+
+  const viewer = $3Dmol.createViewer(box,{
+   backgroundColor:'#0b141d'
+  });
+
+  viewer.addModel(sdf,'sdf');
+
+  viewer.setStyle({},{
+   stick:{
+    radius:.16,
+    colorscheme:'Jmol'
+   },
+   sphere:{
+    scale:.24,
+    colorscheme:'Jmol'
+   }
+  });
+
+  viewer.zoomTo();
+  viewer.render();
+  viewer.zoom(1.15,700);
+
+  window.addEventListener('resize',()=>viewer.resize());
+
+ } catch(e) {
+
+  box.className = 'empty';
+  box.textContent =
+   'A 3D conformer is not available for this compound.';
+
+ }
+}
+
+// Analyze molecule
+async function analyze() {
+
+ const name = $('molname').value.trim() || 'Untitled molecule';
+ const smiles = $('smiles').value.trim();
+
+ if(!smiles) {
+  status('Enter a SMILES notation first.','bad');
+  return;
+ }
+
+ status('Validating notation and retrieving molecular data…');
+
+ $('analyze').disabled = true;
+
+ try {
+
+  render2d(smiles);
+
+  const data = await pubchem(smiles);
+
+  current = {
+   name,
+   smiles,
+   ...data
+  };
+
+  $('properties').innerHTML = [
+   ['FORMULA',data.MolecularFormula],
+   ['MOLAR MASS',data.MolecularWeight+' g/mol'],
+   ['XLOGP',data.XLogP ?? '—'],
+   ['TPSA',data.TPSA == null ? '—' : data.TPSA+' Å²']
+  ].map(([a,b]) =>
+   `<div class="prop"><span>${a}</span><b>${esc(b)}</b></div>`
+  ).join('');
+
+  status(`Valid structure · PubChem CID ${data.cid}`,'good');
+
+  load3d(data.cid);
+
+ } catch(e) {
+
+  status(e.message,'bad');
+
+  $('draw3d').className = 'empty';
+  $('draw3d').textContent =
+   '3D view unavailable until a matching compound is found.';
+
+ } finally {
+
+  $('analyze').disabled = false;
+
+ }
+}
+
+// Comparison table
+function drawCompare() {
+
+ const body = $('compareBody');
+
+ if(!compare.length) {
+  body.innerHTML =
+   '<tr><td colspan="6">No compounds added yet.</td></tr>';
+  return;
+ }
+
+ body.innerHTML = compare.map((m,i) => `
+  <tr>
+   <td>
+    <b>${esc(m.name)}</b><br>
+    <span class="muted">CID ${m.cid}</span>
+   </td>
+   <td>${esc(m.MolecularFormula || '—')}</td>
+   <td>${esc(m.MolecularWeight || '—')}</td>
+   <td>${esc(m.XLogP ?? '—')}</td>
+   <td>${esc(m.TPSA ?? '—')}</td>
+   <td>
+    <button class="chip" data-remove="${i}">Remove</button>
+   </td>
+  </tr>
+ `).join('');
+
+ body.querySelectorAll('[data-remove]').forEach(b => {
+  b.onclick = () => {
+   compare.splice(+b.dataset.remove,1);
+   drawCompare();
+  };
+ });
+}
+
+// Add molecule to comparison
+$('addcompare').onclick = () => {
+
+ if(!current) {
+  status('Analyze a molecule before comparing.','bad');
+  return;
+ }
+
+ if(compare.some(m => m.cid === current.cid)) {
+  status('This molecule is already in comparison.');
+  return;
+ }
+
+ compare.push(current);
+
+ drawCompare();
+
+ status(`${current.name} added to comparison.`,'good');
+};
+
+// Analyze button
+$('analyze').onclick = analyze;
+
+// Clear button
+$('clear').onclick = () => {
+
+ $('molname').value = '';
+ $('smiles').value = '';
+
+ current = null;
+
+ status('Input cleared.');
+
+ $('draw2d').className = 'empty';
+ $('draw2d').textContent =
+  'Your 2D molecular structure will appear here.';
+
+ $('draw3d').className = 'empty';
+ $('draw3d').textContent =
+  '3D conformer loads after analysis.';
+
+ $('properties').innerHTML =
+  ['FORMULA','MOLAR MASS','XLOGP','TPSA']
+  .map(x =>
+   `<div class="prop"><span>${x}</span><b>—</b></div>`
+  ).join('');
+
+};
+
+// Download comparison as CSV
+$('downloadCsv').onclick = () => {
+
+ if(!compare.length) {
+  status('Add at least one compound before exporting.','bad');
+  return;
+ }
+
+ const columns = [
+  'Name',
+  'SMILES',
+  'CID',
+  'Formula',
+  'MolecularWeight_g_mol',
+  'XLogP',
+  'TPSA',
+  'IUPACName'
+ ];
+
+ const rows = compare.map(m => [
+  m.name,
+  m.smiles,
+  m.cid,
+  m.MolecularFormula,
+  m.MolecularWeight,
+  m.XLogP,
+  m.TPSA,
+  m.IUPACName
+ ]);
+
+ const csv = [columns,...rows]
+  .map(row =>
+   row.map(v =>
+    '"' + String(v ?? '').replace(/"/g,'""') + '"'
+   ).join(',')
+  )
+  .join('\n');
+
+ const a = document.createElement('a');
+
+ a.href = URL.createObjectURL(
+  new Blob([csv],{type:'text/csv'})
+ );
+
+ a.download = 'chemilab-molecule-report.csv';
+
+ a.click();
+
+ URL.revokeObjectURL(a.href);
+
+};
+
+// Switch visualization tabs
+document.querySelectorAll('.tab').forEach(t => {
+
+ t.onclick = () => {
+
+  document.querySelectorAll('.tab')
+   .forEach(x => x.classList.remove('active'));
+
+  t.classList.add('active');
+
+  const which = t.dataset.view;
+
+  document.querySelectorAll('.viewbox').forEach((v,i) => {
+
+   v.style.display =
+    (which === '2d' ? i === 0 : i === 1)
+    ? 'block'
+    : 'none';
+
+  });
+
+ };
+
+});
+
+// Default view
+document.querySelectorAll('.viewbox')[1].style.display = 'none';
+
+</script>
+
+</body>
+</html>
